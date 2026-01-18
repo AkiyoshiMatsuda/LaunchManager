@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>cmd_handler</title>
+    <title>LaunchManager</title>
 </head>
 <body>
+    <h1>todoapp</h1> 
     <form action="/start_backend" method="post">
         <button type="submit" {% if backend_running %}disabled{% endif %}>
             Backend start
@@ -23,8 +24,11 @@
             Backend stop
         </button>
     </form>
-    <form action="/start_frontend" method="post">
-        <button type="submit">Frontend start</button>
+    <form action="/restart_backend" method="post">
+        <button {% if not backend_running %}disabled{% endif %}>
+            Backend restart
+        </button>
     </form>
+
 </body>
 </html>
