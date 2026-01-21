@@ -1,34 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LaunchManager</title>
 </head>
 <body>
-    <h1>todoapp</h1> 
+    <h1>todoapp</h1>
+
+    <!-- 状態表示：JSが中身を書き換える -->
+    <h2>
+        <div id="status">Loading...</div>
+    </h2>
+
+    <!-- Start -->
     <form action="/start_backend" method="post">
-        <button type="submit" {% if backend_running %}disabled{% endif %}>
+        <button type="submit">
             Backend start
         </button>
     </form>
-    <h2>
-        {% if backend_running %}
-            <span style="color: green;">● 起動中</span>
-        {% else %}
-            <span style="color: red;">● 停止中</span>
-        {% endif %}
-    </h2>
+
+    <!-- Stop -->
     <form action="/stop_backend" method="post">
-        <button {% if not backend_running %}disabled{% endif %}>
+        <button>
             Backend stop
         </button>
     </form>
+
+    <!-- Restart -->
     <form action="/restart_backend" method="post">
-        <button {% if not backend_running %}disabled{% endif %}>
+        <button>
             Backend restart
         </button>
     </form>
 
+    <!-- JS -->
+    <script src="{{ url_for('static', filename='js/status.js') }}"></script>
 </body>
 </html>
