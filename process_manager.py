@@ -76,90 +76,207 @@
 #             return self.proc.pid
 #         return None
 
+# import subprocess
+# import threading
+# import time
+# from pathlib import Path
+# from datetime import datetime
+
+# class ManagedProcess:
+#     def __init__(self, name, command, cwd, env=None, log_dir="logs"):
+#         self.name = name
+#         self.command = command
+#         self.cwd = cwd
+#         self.env = env
+#         self.proc = None
+#         self.status = "STOPPED"
+
+#         # ログディレクトリ
+#         self.log_path = Path(log_dir) / name
+#         self.log_path.mkdir(parents=True, exist_ok=True)
+
+#         self.stdout_log = open(self.log_path / "stdout.log", "a", encoding="utf-8")
+#         self.stderr_log = open(self.log_path / "stderr.log", "a", encoding="utf-8")
+#         self.manager_log = self.log_path / "manager.log"
+
+#         self.lock = threading.Lock()
+
+#     def _log(self, message):
+#         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#         with open(self.manager_log, "a", encoding="utf-8") as f:
+#             f.write(f"[{ts}] {message}\n")
+
+#     def start(self):
+#         with self.lock:
+#             if self.proc and self.proc.poll() is None:
+#                 self._log("START ignored (already running)")
+#                 return
+
+#             self._log("START requested")
+#             self.status = "STARTING"
+
+#             self.proc = subprocess.Popen(
+#                 self.command,
+#                 cwd=self.cwd,
+#                 env=self.env,
+#                 stdout=self.stdout_log,
+#                 stderr=self.stderr_log
+#             )
+
+#             threading.Thread(target=self._watch, daemon=True).start()
+
+#     def _watch(self):
+#         time.sleep(1)
+
+#         if self.proc.poll() is None:
+#             self.status = "RUNNING"
+#             self._log(f"RUNNING (pid={self.proc.pid})")
+#             self.proc.wait()
+
+#         self.status = "STOPPED"
+#         self._log("STOPPED")
+
+#     def stop(self):
+#         with self.lock:
+#             if not self.proc or self.proc.poll() is not None:
+#                 self.status = "STOPPED"
+#                 self._log("STOP ignored (not running)")
+#                 return
+
+#             self._log("STOP requested")
+#             self.status = "STOPPING"
+#             self.proc.terminate()
+
+#             try:
+#                 self.proc.wait(timeout=5)
+#             except subprocess.TimeoutExpired:
+#                 self._log("FORCE KILL")
+#                 self.proc.kill()
+
+#             self.status = "STOPPED"
+#             self._log("STOPPED")
+
+#     def restart(self):
+#         self._log("RESTART requested")
+#         self.stop()
+#         self.start()
+
+#     @property
+#     def pid(self):
+#         if self.proc and self.proc.poll() is None:
+#             return self.proc.pid
+#         return None
+
 import subprocess
 import threading
 import time
-from pathlib import Path
-from datetime import datetime
+from logging_config import get_process_logger
+
 
 class ManagedProcess:
-    def __init__(self, name, command, cwd, env=None, log_dir="logs"):
+    def __init__(self, name, command, cwd, env=None):
         self.name = name
         self.command = command
         self.cwd = cwd
         self.env = env
+
         self.proc = None
         self.status = "STOPPED"
-
-        # ログディレクトリ
-        self.log_path = Path(log_dir) / name
-        self.log_path.mkdir(parents=True, exist_ok=True)
-
-        self.stdout_log = open(self.log_path / "stdout.log", "a", encoding="utf-8")
-        self.stderr_log = open(self.log_path / "stderr.log", "a", encoding="utf-8")
-        self.manager_log = self.log_path / "manager.log"
-
         self.lock = threading.Lock()
 
-    def _log(self, message):
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with open(self.manager_log, "a", encoding="utf-8") as f:
-            f.write(f"[{ts}] {message}\n")
+        # ★ ロガー取得（設計は logging_config.py）
+        self.logger = get_process_logger(name)
+
+    # =========================
+    # Process Control
+    # =========================
 
     def start(self):
         with self.lock:
             if self.proc and self.proc.poll() is None:
-                self._log("START ignored (already running)")
+                self.logger.warning("START ignored (already running)")
                 return
 
-            self._log("START requested")
+            self.logger.info("START requested")
             self.status = "STARTING"
 
             self.proc = subprocess.Popen(
                 self.command,
                 cwd=self.cwd,
                 env=self.env,
-                stdout=self.stdout_log,
-                stderr=self.stderr_log
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1
             )
 
-            threading.Thread(target=self._watch, daemon=True).start()
+            threading.Thread(
+                target=self._watch,
+                daemon=True
+            ).start()
+
+            threading.Thread(
+                target=self._pipe_logger,
+                args=(self.proc.stdout, "STDOUT"),
+                daemon=True
+            ).start()
+
+            threading.Thread(
+                target=self._pipe_logger,
+                args=(self.proc.stderr, "STDERR"),
+                daemon=True
+            ).start()
+
+    def stop(self):
+        with self.lock:
+            if not self.proc or self.proc.poll() is not None:
+                self.logger.warning("STOP ignored (not running)")
+                self.status = "STOPPED"
+                return
+
+            self.logger.info("STOP requested")
+            self.status = "STOPPING"
+
+            self.proc.terminate()
+
+            try:
+                self.proc.wait(timeout=5)
+                self.logger.info("Process terminated gracefully")
+            except subprocess.TimeoutExpired:
+                self.logger.error("FORCE KILL")
+                self.proc.kill()
+                self.proc.wait()
+
+            self.status = "STOPPED"
+            self.logger.info("STOPPED")
+
+    def restart(self):
+        self.logger.info("RESTART requested")
+        self.stop()
+        self.start()
+
+    # =========================
+    # Internal
+    # =========================
 
     def _watch(self):
         time.sleep(1)
 
         if self.proc.poll() is None:
             self.status = "RUNNING"
-            self._log(f"RUNNING (pid={self.proc.pid})")
+            self.logger.info("RUNNING (pid=%s)", self.proc.pid)
             self.proc.wait()
 
         self.status = "STOPPED"
-        self._log("STOPPED")
+        self.logger.info("PROCESS EXITED")
 
-    def stop(self):
-        with self.lock:
-            if not self.proc or self.proc.poll() is not None:
-                self.status = "STOPPED"
-                self._log("STOP ignored (not running)")
-                return
+    def _pipe_logger(self, pipe, label):
+        for line in pipe:
+            self.logger.info("%s | %s", label, line.rstrip())
 
-            self._log("STOP requested")
-            self.status = "STOPPING"
-            self.proc.terminate()
-
-            try:
-                self.proc.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                self._log("FORCE KILL")
-                self.proc.kill()
-
-            self.status = "STOPPED"
-            self._log("STOPPED")
-
-    def restart(self):
-        self._log("RESTART requested")
-        self.stop()
-        self.start()
+    # =========================
+    # Info
+    # =========================
 
     @property
     def pid(self):
