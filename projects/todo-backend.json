@@ -1,0 +1,6 @@
+{
+    "id":"todo-backend",
+    "name":"TodoApp backend",
+    "cwd":"C:/Users/akiyoshi/Desktop/todoapp/todoapp-be",
+    "command":["todoapp.exe"]
+}

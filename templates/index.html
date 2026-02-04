@@ -1,40 +1,80 @@
+<!-- <!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LaunchManager</title>
+</head>
+<body>
+  <h1>LaunchManager</h1>
+
+  {% for p in projects %}
+    <section class="project" data-project-id="{{ p.id }}">
+      <h2>{{ p.name }} <small>({{ p.id }})</small></h2>
+
+      <div>
+        状態: <span id="status-{{ p.id }}">---</span>
+        / PID: <span id="pid-{{ p.id }}">---</span>
+      </div>
+
+      <form class="lm-form" action="/start/{{ p.id }}" method="post" style="display:inline;">
+        <button id="btn-start-{{ p.id }}" type="submit">Start</button>
+      </form>
+
+      <form class="lm-form" action="/stop/{{ p.id }}" method="post" style="display:inline;">
+        <button id="btn-stop-{{ p.id }}" type="submit">Stop</button>
+      </form>
+
+      <form class="lm-form" action="/restart/{{ p.id }}" method="post" style="display:inline;">
+        <button id="btn-restart-{{ p.id }}" type="submit">Restart</button>
+      </form>
+
+      <hr />
+    </section>
+  {% endfor %}
+
+  <script src="{{ url_for('static', filename='js/status.js') }}"></script>
+</body>
+</html> -->
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LaunchManager</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LaunchManager</title>
 </head>
 <body>
-    <h1>todoapp</h1>
+  <h1>LaunchManager</h1>
 
-    <!-- 状態表示：JSが中身を書き換える -->
-    <h2>
-        <div id="status">Loading...</div>
-    </h2>
+  {% for p in projects %}
+    <section class="project" data-project-id="{{ p.id }}">
+      <h2>{{ p.name }} <small>({{ p.id }})</small></h2>
 
-    <!-- Start -->
-    <form action="/start_backend" method="post">
-        <button type="submit">
-            Backend start
-        </button>
-    </form>
+      <div>
+        状態: <span id="status-{{ p.id }}">---</span>
+        / PID: <span id="pid-{{ p.id }}">---</span>
+      </div>
 
-    <!-- Stop -->
-    <form action="/stop_backend" method="post">
-        <button>
-            Backend stop
-        </button>
-    </form>
+      <!-- ★ 追加：エラー表示枠（JSがここを書き換える） -->
+      <div id="error-{{ p.id }}" style="color: red; margin-top: 6px;"></div>
 
-    <!-- Restart -->
-    <form action="/restart_backend" method="post">
-        <button>
-            Backend restart
-        </button>
-    </form>
+      <form class="lm-form" action="/start/{{ p.id }}" method="post" style="display:inline;">
+        <button id="btn-start-{{ p.id }}" type="submit">Start</button>
+      </form>
 
-    <!-- JS -->
-    <script src="{{ url_for('static', filename='js/status.js') }}"></script>
+      <form class="lm-form" action="/stop/{{ p.id }}" method="post" style="display:inline;">
+        <button id="btn-stop-{{ p.id }}" type="submit">Stop</button>
+      </form>
+
+      <form class="lm-form" action="/restart/{{ p.id }}" method="post" style="display:inline;">
+        <button id="btn-restart-{{ p.id }}" type="submit">Restart</button>
+      </form>
+
+      <hr />
+    </section>
+  {% endfor %}
+
+  <script src="{{ url_for('static', filename='js/status.js') }}"></script>
 </body>
 </html>
