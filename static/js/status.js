@@ -1,22 +1,3 @@
-// function setWaiting() {
-//     const status = document.getElementById("status");
-//     status.innerHTML = '<span style="color: orange;">● Waiting...</span>';
-// }
-// async function updateStatus() {
-//   const res = await fetch("/status");
-//   const data = await res.json();
-//   document.getElementById("status").textContent = data.status;
-// }
-
-// updateStatus();
-// setInterval(updateStatus, 1000); // 1秒ごと
-// document.querySelectorAll("form").forEach(form => {
-//     form.addEventListener("submit", () => {
-//         setWaiting();
-//         console.log("確認用log");
-//     });
-// });
-
 const statusEl = document.getElementById("status");
 
 function renderStatus(status) {
