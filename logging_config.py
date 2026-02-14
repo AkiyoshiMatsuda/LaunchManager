@@ -28,3 +28,15 @@ def get_process_logger(process_name: str) -> logging.Logger:
     logger.propagate = False
 
     return logger
+
+def get_log_paths(process_name: str) -> dict[str, Path]:
+    """
+    processごとのログファイルの場所を統一して返す
+    """
+    p = LOG_ROOT / process_name
+    p.mkdir(parents=True, exist_ok=True)
+    return {
+        "stdout": p / "stdout.log",
+        "stderr": p / "stderr.log",
+        "manager": p / "manager.log",
+    }

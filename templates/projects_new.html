@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New Project - LaunchManager</title>
+</head>
+<body>
+  <h1>New Project</h1>
+
+  {% if error %}
+    <div style="color:#b00020; margin: 10px 0; white-space: pre-wrap;">
+      {{ error }}
+    </div>
+  {% endif %}
+
+  <form method="post" action="/projects/new" style="display:flex; flex-direction:column; gap:10px; max-width:720px;">
+    <label>
+      id（英数字/ハイフン推奨・一意）:
+      <input name="id" required value="{{ form.id or '' }}" style="width:100%;">
+    </label>
+
+    <label>
+      name（表示名）:
+      <input name="name" required value="{{ form.name or '' }}" style="width:100%;">
+    </label>
+
+    <label>
+      cwd（作業ディレクトリ）:
+      <input name="cwd" required value="{{ form.cwd or '' }}" style="width:100%;">
+    </label>
+
+    <label>
+      command（例: todoapp.exe  /  go run main.go）:
+      <input name="command" required value="{{ form.command or '' }}" style="width:100%;">
+      <div style="font-size:12px; color:#666;">※ スペース区切りで分割します（将来は高度な指定にも対応予定）</div>
+    </label>
+
+    <label>
+      wait_port（任意: 起動完了判定）:
+      <input name="wait_port" type="number" min="1" max="65535" value="{{ form.wait_port or '' }}">
+    </label>
+
+    <label>
+      startup_timeout_sec（任意: 起動待ち秒数）:
+      <input name="startup_timeout_sec" type="number" min="1" step="0.5" value="{{ form.startup_timeout_sec or '8' }}">
+    </label>
+
+    <label>
+      <input type="checkbox" name="auto_start" {% if form.auto_start %}checked{% endif %}>
+      auto_start（LaunchManager起動時に自動起動）
+    </label>
+
+    <div style="display:flex; gap:10px;">
+      <button type="submit">Create</button>
+      <a href="/" style="align-self:center;">Cancel</a>
+    </div>
+  </form>
+
+  <hr>
+  <h3>補足</h3>
+  <ul>
+    <li>作成後は <code>projects/&lt;id&gt;.json</code> が生成されます</li>
+    <li>後で編集・削除ページを追加する前提で作っています</li>
+  </ul>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "id": "todo-frontend",
+  "name": "TodoApp React",
+  "cwd": "C:/Users/akiyoshi/Desktop/todoapp/todoapp-fe/todoapp-main",
+  "command": [
+    "cmd",
+    "/c",
+    "npm",
+    "run",
+    "dev"
+  ],
+  "auto_start": false,
+  "startup_timeout_sec": 8.0
+}

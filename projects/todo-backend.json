@@ -1,6 +1,11 @@
 {
-    "id":"todo-backend",
-    "name":"TodoApp backend",
-    "cwd":"C:/Users/akiyoshi/Desktop/todoapp/todoapp-be",
-    "command":["todoapp.exe"]
+  "id": "todo-backend",
+  "name": "TodoApp backend",
+  "cwd": "C:/Users/akiyoshi/Desktop/todoapp/todoapp-be",
+  "command": [
+    "todoapp.exe"
+  ],
+  "auto_start": true,
+  "wait_port": 8080,
+  "startup_timeout_sec": 10
 }
