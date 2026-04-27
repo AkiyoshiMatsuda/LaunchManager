@@ -9,6 +9,6 @@
     "run",
     "dev"
   ],
-  "auto_start": false,
+  "auto_start": true,
   "startup_timeout_sec": 8.0
 }

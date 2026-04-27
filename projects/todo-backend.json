@@ -7,5 +7,5 @@
   ],
   "auto_start": true,
   "wait_port": 8080,
-  "startup_timeout_sec": 10
+  "startup_timeout_sec": 20
 }

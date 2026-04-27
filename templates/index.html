@@ -4,130 +4,147 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LaunchManager</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Theme -->
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #ffffff;
+      --surface-2: #f8fafc;
+      --border: #e5e7eb;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --danger: #ef4444;
+    }
+  </style>
 </head>
-<body>
-  <h1>LaunchManager</h1>
-  <p><a href="/projects/new">プロジェクトを追加 + </a></p>
+
+<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen">
+
+<div class="max-w-5xl mx-auto px-6 py-10">
+
+  <!-- Header -->
+  <header class="mb-10 flex items-center justify-between">
+    <h1 class="text-2xl font-semibold tracking-tight">LaunchManager</h1>
+    <a href="/projects/new"
+       class="text-sm text-[var(--primary)] hover:underline">
+      + プロジェクトを追加
+    </a>
+  </header>
+
   {% for p in projects %}
-    <section class="project" data-project-id="{{ p.id }}">
-      <h2>{{ p.name }} <small>({{ p.id }})</small></h2>
+  <section class="project mb-8 rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-sm p-6"
+           data-project-id="{{ p.id }}">
 
+    <!-- Title -->
+    <div class="flex items-start justify-between">
       <div>
-        状態: <span id="status-{{ p.id }}">---</span>
-        / PID: <span id="pid-{{ p.id }}">---</span>
-      </div>
-
-      <div style="margin-top: 6px;">
-        auto_start:
-        {% if p.auto_start %}
-          <strong style="color: green;">ON</strong>
-        {% else %}
-          <strong style="color: gray;">OFF</strong>
-        {% endif %}
-
-        <form class="lm-form" action="/toggle_autostart/{{ p.id }}" method="post" style="display:inline; margin-left: 8px;">
-          <button type="submit">Toggle</button>
-        </form>
-      </div>
-
-      <div style="margin-top: 8px;">
-        <button type="button" class="btn-logs" data-kind="stdout">stdout</button>
-        <button type="button" class="btn-logs" data-kind="stderr">stderr</button>
-        <button type="button" class="btn-logs" data-kind="manager">manager</button>
-      </div>
-
-      <div id="error-{{ p.id }}" style="color: red; margin-top: 6px;"></div>
-
-      <div style="margin-top: 8px;">
-        <form class="lm-form" action="/start/{{ p.id }}" method="post" style="display:inline;">
-          <button id="btn-start-{{ p.id }}" type="submit">Start</button>
-        </form>
-
-        <form class="lm-form" action="/stop/{{ p.id }}" method="post" style="display:inline;">
-          <button id="btn-stop-{{ p.id }}" type="submit">Stop</button>
-        </form>
-
-        <form class="lm-form" action="/restart/{{ p.id }}" method="post" style="display:inline;">
-          <button id="btn-restart-{{ p.id }}" type="submit">Restart</button>
-        </form>
-      </div>
-
-      <hr />
-    </section>
-  {% endfor %}
-
-  <!-- ========================= -->
-  <!-- Log Modal -->
-  <!-- ========================= -->
-  <div id="logModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);">
-    <div style="position:absolute; top:5%; left:5%; right:5%; bottom:5%; background:#0f0f10; color:#e6e6e6; border-radius:10px; overflow:hidden; display:flex; flex-direction:column;">
-
-      <!-- Header -->
-      <div style="padding:10px 12px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #333;">
-        <div>
-          <strong id="logModalTitle">Logs</strong>
-          <span id="logModalMeta" style="margin-left:10px; color:#aaa; font-size:12px;"></span>
-        </div>
-        <div>
-          <button type="button" id="logPopoutBtn">Popout</button>
-          <button type="button" id="logCloseBtn">✕</button>
+        <h2 class="text-lg font-semibold tracking-tight">
+          {{ p.name }}
+        </h2>
+        <div class="text-xs text-[var(--muted)]">
+          {{ p.id }}
         </div>
       </div>
+    </div>
 
-      <!-- Controls -->
-      <div style="padding:8px 12px; border-bottom:1px solid #333; font-size:13px;">
-
-        <!-- 行数 + 折り返し + 更新 -->
-        <div style="margin-bottom:6px;">
-          <label style="margin-right:12px;">
-            行数:
-            <select id="logLineCount">
-              <option value="200">200</option>
-              <option value="500" selected>500</option>
-              <option value="1000">1000</option>
-            </select>
-          </label>
-
-          <label style="margin-right:12px;">
-            <input type="checkbox" id="logWrap" checked />
-            折り返し
-          </label>
-
-          <button type="button" id="logRefreshBtn">更新</button>
-        </div>
-
-        <!-- フィルタ -->
-        <div>
-          フィルタ:
-          <label style="margin-right:10px;">
-            <input type="checkbox" id="filter-debug" checked>
-            DEBUG
-          </label>
-          <label style="margin-right:10px;">
-            <input type="checkbox" id="filter-access" checked>
-            ACCESS
-          </label>
-          <label style="margin-right:10px;">
-            <input type="checkbox" id="filter-warning" checked>
-            WARNING
-          </label>
-          <label>
-            <input type="checkbox" id="filter-error" checked>
-            ERROR
-          </label>
-        </div>
-
+    <!-- Status -->
+    <div class="mt-6 text-center">
+      <div class="text-3xl font-semibold">
+        <span id="status-{{ p.id }}">---</span>
       </div>
+      <div class="mt-1 text-xs text-[var(--muted)]">
+        PID: <span id="pid-{{ p.id }}">---</span>
+      </div>
+    </div>
 
-      <!-- Log Body -->
-      <pre id="logModalBody"
-           style="margin:0; padding:12px; flex:1; overflow:auto; white-space:pre-wrap;
-                  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
-                  font-size:12px; line-height:1.5;"></pre>
+    <!-- Error -->
+    <div id="error-{{ p.id }}"
+         class="mt-3 text-sm text-[var(--danger)] text-center"></div>
+
+    <!-- Start/Stop/Restart -->
+    <div class="mt-6 flex items-center justify-center gap-3">
+
+      <form class="lm-form" action="/start/{{ p.id }}" method="post">
+        <button id="btn-start-{{ p.id }}"
+                class="px-4 py-2 rounded-md text-sm font-medium
+                       bg-[var(--primary)] text-white
+                       hover:opacity-90 transition">
+          Start
+        </button>
+      </form>
+
+      <form class="lm-form" action="/stop/{{ p.id }}" method="post">
+        <button id="btn-stop-{{ p.id }}"
+                class="px-4 py-2 rounded-md text-sm font-medium
+                       border border-[var(--border)]
+                       hover:bg-[var(--surface-2)] transition">
+          Stop
+        </button>
+      </form>
+
+      <form class="lm-form" action="/restart/{{ p.id }}" method="post">
+        <button id="btn-restart-{{ p.id }}"
+                class="px-4 py-2 rounded-md text-sm font-medium
+                       border border-[var(--border)]
+                       hover:bg-[var(--surface-2)] transition">
+          Restart
+        </button>
+      </form>
 
     </div>
-  </div>
 
-  <script src="{{ url_for('static', filename='js/status.js') }}"></script>
+    <!-- Logs -->
+    <div class="mt-6 flex items-center justify-center gap-2">
+      <button type="button"
+              class="btn-logs px-3 py-2 rounded-md border border-[var(--border)] text-sm hover:bg-[var(--surface-2)] transition"
+              data-kind="stdout">
+        stdout
+      </button>
+      <button type="button"
+              class="btn-logs px-3 py-2 rounded-md border border-[var(--border)] text-sm hover:bg-[var(--surface-2)] transition"
+              data-kind="stderr">
+        stderr
+      </button>
+      <button type="button"
+              class="btn-logs px-3 py-2 rounded-md border border-[var(--border)] text-sm hover:bg-[var(--surface-2)] transition"
+              data-kind="manager">
+        manager
+      </button>
+    </div>
+
+  </section>
+  {% endfor %}
+
+</div>
+
+<!-- Log Modal（元のまま維持） -->
+<div id="logModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);">
+  <div style="position:absolute; top:5%; left:5%; right:5%; bottom:5%; background:#0f0f10; color:#e6e6e6; border-radius:10px; overflow:hidden; display:flex; flex-direction:column;">
+
+    <div style="padding:10px 12px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #333;">
+      <div>
+        <strong id="logModalTitle">Logs</strong>
+        <span id="logModalMeta" style="margin-left:10px; color:#aaa; font-size:12px;"></span>
+      </div>
+      <div>
+        <button type="button" id="logPopoutBtn">Popout</button>
+        <button type="button" id="logCloseBtn">✕</button>
+      </div>
+    </div>
+
+    <pre id="logModalBody"
+         style="margin:0; padding:12px; flex:1; overflow:auto; white-space:pre-wrap;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+                font-size:12px; line-height:1.5;"></pre>
+
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/status.js') }}"></script>
 </body>
 </html>
